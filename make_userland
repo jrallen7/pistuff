@@ -1,0 +1,21 @@
+#!/usr/bin/bash
+sudo apt install gcc cmake build-essential git
+cd ~
+git clone https://github.com/raspberrypi/userland
+
+sed -i 's/__bitwise/FDT_BITWISE/' ~/userland/opensrc/helpers/libfdt/libfdt_env.h
+sed -i 's/__force/FDT_FORCE/' ~/userland/opensrc/helpers/libfdt/libfdt_env.h
+
+cd userland
+mkdir build
+cd build
+
+cmake -DCMAKE_BUILD_TYPE=Release -DARM64=ON ../
+make -j4
+sudo make install
+
+sudo cp -rfp /opt/vc/* /usr
+
+
+echo "now add /opt/vc/lib  to /etc/ld.so.conf"
+echo "and then run ldconfig"
