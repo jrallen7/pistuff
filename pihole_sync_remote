@@ -17,6 +17,7 @@ def readListLocal(filename):
 
 if __name__ == '__main__':
 
+
     adlistLocRemote = r'https://v.firebog.net/hosts/lists.php?type=tick'
     adlistLocLocal = r'/etc/pihole/PyPhDB/adlists.list'
     
@@ -36,6 +37,8 @@ if __name__ == '__main__':
     
     print('root, continuing')
 
+    subprocess.call('./pihole_dump')
+
     print('fetching remote ad list')
     list1 = fetchListRemote(adlistLocRemote)
     print('reading local ad list')
@@ -54,3 +57,4 @@ if __name__ == '__main__':
     else:
         print(foo)
     
+    subprocess.call('./pihole_clean')
