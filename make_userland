@@ -1,23 +1,31 @@
 #!/usr/bin/bash
 
+cd ~
+
 echo "fetching packages..."
 sudo apt-get -y install gcc cmake build-essential git
-cd ~
+
+echo "cloning repo..."
 git clone https://github.com/raspberrypi/userland
 
+echo "patching files..."
 sed -i 's/__bitwise/FDT_BITWISE/' ~/userland/opensrc/helpers/libfdt/libfdt_env.h
 sed -i 's/__force/FDT_FORCE/'     ~/userland/opensrc/helpers/libfdt/libfdt_env.h
 
-cd userland
-mkdir build
-cd build
-
+echo "building..."
+mkdir ./userland/build
+cd ./userland/build
 cmake -DCMAKE_BUILD_TYPE=Release -DARM64=ON ../
 make -j4
 sudo make install
 
+echo "copying binaries..."
 sudo cp -rfp /opt/vc/* /usr
 
+#echo "now add /opt/vc/lib  to /etc/ld.so.conf"
+#echo "and then run ldconfig"
+echo "updating ldconfig..."
+echo "/opt/vc/lib" | sudo tee -a /etc/ld.so.conf > /dev/null
+sudo ldconfig
 
-echo "now add /opt/vc/lib  to /etc/ld.so.conf"
-echo "and then run ldconfig"
+echo "done..."
