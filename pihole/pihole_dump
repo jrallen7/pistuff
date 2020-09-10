@@ -1,0 +1,3 @@
+#!/usr/bin/sh
+
+curl -sSl https://raw.githubusercontent.com/mmotti/PyPhDB/master/PyPhDB.py | sudo python3 - --dump
