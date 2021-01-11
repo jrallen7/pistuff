@@ -1,3 +1,16 @@
 # Xbox Achievements and game stats sync
 v10.events.data.microsoft.com
 v20.events.data.microsoft.com
+
+# GeForce Experience
+events.gfe.nvidia.com
+gfwsl.geforce.com
+
+# Netflix - Domains needed for netlix to work correctly
+api-global.netflix.com
+appboot.netflix.com
+secure.netflix.com
+
+# Nvidia updates
+ota-downloads.nvidia.com
+
