@@ -2,7 +2,7 @@
 
 sudo apt update
 sudo apt upgrade
-sudo apt-get -y install screen vim rng-tools git unattended-upgrades boinc-client python3-pip
+sudo apt-get -y install screen vim rng-tools git unattended-upgrades boinc-client python3-pip gcc cmake build-essential
 
 sudo pip3 install validators
 
