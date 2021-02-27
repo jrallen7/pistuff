@@ -37,7 +37,7 @@ if __name__ == '__main__':
     
     print('root, continuing')
 
-    subprocess.call('./pihole_dump')
+    subprocess.call('./PyPhDB_dump')
 
     print('fetching remote ad list')
     list1 = fetchListRemote(adlistLocRemote)
@@ -61,4 +61,4 @@ if __name__ == '__main__':
         for xxxxx in foo:
             print(xxxxx)
     
-    subprocess.call('./pihole_clean')
+    subprocess.call('./PyPhDB_clean')
