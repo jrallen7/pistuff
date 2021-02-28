@@ -1,0 +1,109 @@
+#!/usr/bin/python3
+
+import os,sys,subprocess
+import hashlib
+import urllib.request
+import tldextract
+import codecs
+
+def calcHashBytes(data):
+    h = hashlib.sha256()
+    h.update(data)
+    return h.hexdigest()
+
+def calcHashFile(fname):
+    try:
+        with open(fname, 'rb') as fi:
+            return calcHashBytes(fi.read())
+    except FileNotFoundError:
+        return ''
+
+def sortDomainList(domainList):
+    return [bar[-1] for bar in \
+        sorted((tldextract.extract(foo).registered_domain, foo) for foo in \
+        domainList)]
+
+def fetchList(url):
+    with urllib.request.urlopen(url) as response:
+        listData = [foo.strip() for foo in \
+            codecs.decode(response.read(), 'utf-8', 'strict').split()]
+    return listData
+
+def convertListToBytes(siteList):
+    return codecs.encode('\n'.join(siteList), 'utf-8', 'strict')
+
+def test1():
+    with open('whitelist.custom.txt', 'rt') as fi:
+        testlist = [foo.strip() for foo in fi.read().split()]
+    print(testlist)
+    print(sortDomainList(testlist))
+    sys.exit()
+
+if __name__ == '__main__':
+
+    adlistLocRemote = r'https://v.firebog.net/hosts/lists.php?type=tick'
+    adlistLocLocal = r'/etc/pihole/PyPhDB/adlists.list'
+    
+    whitelistLocRemote = r'https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt'
+    whitelistLocLocal = r'/etc/pihole/PyPhDB/whitelist.list'
+    whitelistLocCustom = 'whitelist.custom.txt'
+
+    ### Root Permission Check
+    print('Checking root permissions... ', end='')
+    if os.geteuid() != 0:
+        print('not root, escalating')
+        #use this version for python 3.4 or before...
+        #subprocess.call(['sudo', 'python3'] + sys.argv)
+        #use this version for python 3.5 or later...
+        subprocess.call(['sudo', 'python3', *sys.argv])
+        quit()
+    
+    print('root, continuing')
+    
+    ### adlist Processing
+    print('Hashing local adlist')
+    adlistHashLocal = calcHashFile(adlistLocLocal)
+    print(adlistHashLocal)
+    
+    print('Hashing remote adlist')
+    adlistListRemote = fetchList(adlistLocRemote)
+    adlistDataRemote = convertListToBytes(adlistListRemote)
+    adlistHashRemote = calcHashBytes(adlistDataRemote)
+    print(adlistHashRemote)
+    
+    flagAdlistMatch = adlistHashLocal == adlistHashRemote
+    if flagAdlistMatch:
+        print('Adlist files match; no action')
+    else:
+        print('Adlist files mismatch; rewriting...')
+        with open(adlistLocLocal, 'wb') as fo:
+            fo.write(adlistDataRemote)
+
+    ### whitelist Processing
+    print('Hashing local whitelist')
+    whitelistHashLocal = calcHashFile(whitelistLocLocal)
+    print(whitelistHashLocal)
+    
+    print('Fetching remote whitelist')
+    whitelistListRemote = fetchList(whitelistLocRemote)
+    print('Constructing remote+custom whitelist')
+    with open(whitelistLocCustom, 'rb') as fi:
+        whitelistListCustom = [foo.strip() for foo in codecs.decode(fi.read(),'utf-8').split()]
+    whitelistListRemoteCustom = sortDomainList(list(set(whitelistListRemote + whitelistListCustom)))
+    whitelistDataRemoteCustom = convertListToBytes(whitelistListRemoteCustom)
+    whitelistHashRemoteCustom = calcHashBytes(whitelistDataRemoteCustom)
+    print(whitelistHashRemoteCustom)
+    
+    flagWhitelistMatch = whitelistHashLocal == whitelistHashRemoteCustom
+    if flagWhitelistMatch:
+        print('Whitelist files match; no action')
+    else:
+        print('Whitelist files mismatch; rewriting...')
+        with open(whitelistLocLocal, 'wb') as fo:
+            fo.write(whitelistDataRemoteCustom)
+
+    #Check for changes and maybe update gravity
+    if not (flagAdlistMatch and flagWhitelistMatch):
+        print('Updating Pihole Gravity...')
+        #subprocess.call(['pihole', '-g'])
+
