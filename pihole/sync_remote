@@ -6,17 +6,18 @@ import codecs
 
 def fetchListRemote(url):
     with urllib.request.urlopen(url) as response:
-        listData = sorted(foo.strip() for foo in \
+        listData = set(foo.strip() for foo in \
             codecs.decode(response.read(), 'utf-8', 'strict').split())
     return listData
 
 def readListLocal(filename):
     with open(filename, 'rt') as fi:
-        fdata = sorted(foo.strip() for foo in fi.read().split())
+        fdata = set(foo.strip() for foo in fi.read().split())
     return fdata
 
 if __name__ == '__main__':
 
+    flaggravityrefresh = False
 
     adlistLocRemote = r'https://v.firebog.net/hosts/lists.php?type=tick'
     adlistLocLocal = r'/etc/pihole/PyPhDB/adlists.list'
@@ -39,26 +40,38 @@ if __name__ == '__main__':
 
     subprocess.call('./PyPhDB_dump')
 
-    print('fetching remote ad list')
-    list1 = fetchListRemote(adlistLocRemote)
-    print('reading local ad list')
-    list2 = readListLocal(adlistLocLocal)
+    print('fetching remote block lists')
+    blocklistremote = fetchListRemote(adlistLocRemote)
+    print('reading local block lists')
+    blocklistlocal = readListLocal(adlistLocLocal)
 
-    print('lists in remote but not in local (to be added)')
-    foo = set(list1)-set(list2)
-    if len(foo) == 0:
-        print('none')
+    if blocklistlocal == blocklistremote:
+        print('ad lists match, nothing to do')
     else:
-        for xxxxx in foo:
-            print(xxxxx,end=' ')
-        print()
+        print('ad lists mismatch')
+        missinglists = blocklistremote-blocklistlocal
+        extralists = blocklistlocal-blocklistremote
 
-    print('lists in local but not in remote (to be deleted)')
-    foo = set(list2)-set(list1)
-    if len(foo) == 0:
-        print('none')
-    else:
-        for xxxxx in foo:
-            print(xxxxx)
-    
+        if len(missinglists) > 0:
+            print('lists in remote but not in local (to be added)')
+            for xxxxx in missinglists:
+                print(xxxxx,end=' ')
+            print()
+
+        if len(extralists) > 0:
+            print('lists in local but not in remote (to be deleted)')
+            for xxxxx in extralists:
+                print(xxxxx)
+            print()
+
+        with open('/etc/pihole/PyPhDB/adlists.list', 'w') as fo:
+            for xxx in blocklistremote:
+                fo.write('{}\n'.format(xxx))
+        flaggravityrefresh = True
+
+    if flaggravityrefresh:
+        subprocess.call('./PyPhDB_upload')
+        print('refreshing gravity')
+        subprocess.call(['pihole', '-g'])
+        
     subprocess.call('./PyPhDB_clean')
