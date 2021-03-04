@@ -7,13 +7,13 @@ import codecs
 def fetchListRemote(url):
     with urllib.request.urlopen(url) as response:
         listData = set(foo.strip() for foo in \
-            codecs.decode(response.read(), 'utf-8', 'strict').split())
-    return listData
+            codecs.decode(response.read(), 'utf-8', 'strict').split('\n'))
+    return set(foo for foo in listData if len(foo) > 0 and not foo.startswith('#'))
 
 def readListLocal(filename):
     with open(filename, 'rt') as fi:
-        fdata = set(foo.strip() for foo in fi.read().split())
-    return fdata
+        fdata = set(foo.strip() for foo in fi.read().split('\n'))
+    return set(foo for foo in fdata if len(foo) > 0 and not foo.startswith('#'))
 
 if __name__ == '__main__':
 
@@ -45,6 +45,20 @@ if __name__ == '__main__':
     print('reading local block lists')
     blocklistlocal = readListLocal(adlistLocLocal)
 
+    print('fetching remote whitelist')
+    whitelistremote = fetchListRemote(whitelistLocRemote)
+    print(len(whitelistremote))
+    print('reading local whitelist')
+    whitelistlocal = readListLocal(whitelistLocLocal)
+    print(len(whitelistlocal))
+    print('reading custom whitelist')
+    whitelistcustom = readListLocal(whitelistLocCustom)
+    print(len(whitelistcustom))
+
+    whitelisttotal = whitelistremote | whitelistcustom
+
+    print('-'*70)
+
     if blocklistlocal == blocklistremote:
         print('ad lists match, nothing to do')
     else:
@@ -69,9 +83,37 @@ if __name__ == '__main__':
                 fo.write('{}\n'.format(xxx))
         flaggravityrefresh = True
 
+    print('-'*70)
+
+    if whitelisttotal == whitelistlocal:
+        print('whitelist match, nothing to do')
+    else:
+        print('whitelist mismatch')
+        missinglists = whitelistremote - whitelisttotal
+        extralists = whitelisttotal - whitelistremote
+
+        if len(missinglists) > 0:
+            print('lists in remote but not in local (to be added)')
+            for xxxxx in missinglists:
+                print(xxxxx,end=' ')
+            print()
+
+        if len(extralists) > 0:
+            print('lists in local but not in remote (to be deleted)')
+            for xxxxx in extralists:
+                print(xxxxx)
+            print()
+
+        with open(whitelistLocLocal, 'w') as fo:
+            for xxx in whitelisttotal:
+                fo.write('{}\n'.format(xxx))
+        flaggravityrefresh = True
+
+
     if flaggravityrefresh:
         subprocess.call('./PyPhDB_upload')
         print('refreshing gravity')
         subprocess.call(['pihole', '-g'])
         
+    print('-'*70)
     subprocess.call('./PyPhDB_clean')
