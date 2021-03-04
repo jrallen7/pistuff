@@ -6,14 +6,14 @@ import codecs
 
 def fetchListRemote(url):
     with urllib.request.urlopen(url) as response:
-        listData = set(foo.strip() for foo in \
+        fdata = set(foo.strip() for foo in \
             codecs.decode(response.read(), 'utf-8', 'strict').split('\n'))
-    return set(foo for foo in listData if len(foo) > 0 and not foo.startswith('#'))
+    return {foo for foo in fdata if len(foo) > 0 and not foo.startswith('#')}
 
 def readListLocal(filename):
     with open(filename, 'rt') as fi:
         fdata = set(foo.strip() for foo in fi.read().split('\n'))
-    return set(foo for foo in fdata if len(foo) > 0 and not foo.startswith('#'))
+    return {foo for foo in fdata if len(foo) > 0 and not foo.startswith('#')}
 
 if __name__ == '__main__':
 
