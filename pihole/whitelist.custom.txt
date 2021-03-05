@@ -14,3 +14,11 @@ secure.netflix.com
 # Nvidia updates
 ota-downloads.nvidia.com
 
+# Streamate
+streamate.com
+hybridclient.naiadsystems.com
+sea1b-ls.naiadsystems.com
+manifest-server.naiadsystems.com
+
+# testing
+#0000000000000000000000000.xyz
