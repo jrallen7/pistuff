@@ -5,7 +5,6 @@ sudo timedatectl set-timezone America/Chicago
 sudo apt update
 sudo apt upgrade
 sudo apt-get -y install screen vim rng-tools git unattended-upgrades boinc-client python3-pip gcc cmake build-essential
-
 sudo pip3 install validators
 
 sudo dpkg-reconfigure unattended-upgrades
@@ -14,5 +13,4 @@ ssh-keygen -t ed25519
 
 git config --global user.email james@jamesrallen.xyz
 git config --global core.editor "vim"
-git config credential.helper store
-
+#git config credential.helper store
