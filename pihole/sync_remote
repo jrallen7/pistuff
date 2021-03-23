@@ -48,13 +48,13 @@ if __name__ == '__main__':
 
     print('fetching remote whitelist')
     whitelistremote = fetchListRemote(whitelistLocRemote)
-    print(len(whitelistremote))
+    #print(len(whitelistremote))
     print('reading local whitelist')
     whitelistlocal = readListLocal(whitelistLocLocal)
-    print(len(whitelistlocal))
+    #print(len(whitelistlocal))
     print('reading custom whitelist')
     whitelistcustom = readListLocal(whitelistLocCustom)
-    print(len(whitelistcustom))
+    #print(len(whitelistcustom))
 
     whitelisttotal = whitelistremote | whitelistcustom
 
