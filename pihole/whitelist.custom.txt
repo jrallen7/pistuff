@@ -235,3 +235,4 @@ sea1c-ls.naiadsystems.com
 #0000000000000000000000000.xyz
 
 grcpool.com
+gridcoin.us
