@@ -14,3 +14,8 @@ ssh-keygen -t ed25519
 git config --global user.email james@jamesrallen.xyz
 git config --global core.editor "vim"
 #git config credential.helper store
+
+
+sudo systemctl enable boinc-client.service
+sudo service boinc-client start
+
