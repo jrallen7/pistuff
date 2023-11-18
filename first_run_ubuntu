@@ -4,8 +4,10 @@ sudo timedatectl set-timezone America/Chicago
 
 sudo apt update
 sudo apt upgrade
-sudo apt-get -y install screen vim rng-tools git unattended-upgrades boinc-client python3-pip gcc cmake build-essential
-sudo pip3 install validators
+sudo apt-get -y install screen vim rng-tools git
+sudo apt-get -y unattended-upgrades boinc-client python3-pip gcc cmake build-essential
+sudo apt-get -y python3-validators
+#sudo pip3 install validators
 
 sudo dpkg-reconfigure unattended-upgrades
 
