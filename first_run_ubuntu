@@ -15,6 +15,7 @@ ssh-keygen -t ed25519
 
 git config --global user.email james@jamesrallen.xyz
 git config --global core.editor "vim"
+git config --global user.name "James Allen"
 #git config credential.helper store
 
 
