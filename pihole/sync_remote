@@ -23,6 +23,7 @@ if __name__ == '__main__':
     adlistLocRemote = r'https://v.firebog.net/hosts/lists.php?type=tick'
     #adlistLocRemote = r'https://v.firebog.net/hosts/lists.php?type=nocross'
     adlistLocLocal = r'/etc/pihole/PyPhDB/adlists.list'
+    adlistLocCustom = r'adlist.custom.txt'
     
     whitelistLocRemote = r'https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt'
     whitelistLocLocal = r'/etc/pihole/PyPhDB/whitelist.list'
@@ -46,6 +47,8 @@ if __name__ == '__main__':
     blocklistremote = fetchListRemote(adlistLocRemote)
     print('reading local block lists')
     blocklistlocal = readListLocal(adlistLocLocal)
+    print('reading custom adlists')
+    blocklistcustom = readListLocal(adlistLocCustom)
 
     print('fetching remote whitelist')
     whitelistremote = fetchListRemote(whitelistLocRemote)
@@ -57,16 +60,17 @@ if __name__ == '__main__':
     whitelistcustom = readListLocal(whitelistLocCustom)
     #print(len(whitelistcustom))
 
+    blocklisttotal = blocklistremote | blocklistcustom
     whitelisttotal = whitelistremote | whitelistcustom
 
     print('-'*70)
 
-    if blocklistlocal == blocklistremote:
+    if blocklisttotal == blocklistlocal:
         print('ad lists match, nothing to do')
     else:
         print('ad lists mismatch')
-        missinglists = blocklistremote-blocklistlocal
-        extralists = blocklistlocal-blocklistremote
+        missinglists = blocklisttotal-blocklistlocal
+        extralists = blocklistlocal-blocklisttotal
 
         if len(missinglists) > 0:
             print('lists in remote but not in local (to be added)')
@@ -81,7 +85,7 @@ if __name__ == '__main__':
             print()
 
         with open('/etc/pihole/PyPhDB/adlists.list', 'w') as fo:
-            for xxx in blocklistremote:
+            for xxx in blocklisttotal:
                 fo.write('{}\n'.format(xxx))
         flaggravityrefresh = True
         uploadneeded = True
